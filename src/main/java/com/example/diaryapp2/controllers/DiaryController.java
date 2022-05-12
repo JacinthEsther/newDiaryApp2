@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v1/diaryApp/diaries")
+@RequestMapping("api/v3/diaryApp/diaries")
 public class DiaryController {
     private DiaryService diaryService;
 
@@ -29,9 +29,9 @@ public class DiaryController {
         try {
             User user = userService.findById(Long.valueOf(userId));
             Diary diary = diaryService.createDiary(title,user);
-            UserDto userDto = userService.addDiary(Long.valueOf(userId), diary);
+            Diary savedDiary = userService.addDiary(Long.valueOf(userId), diary);
             ApiResponse apiResponse = ApiResponse.builder()
-                    .payLoad(userDto)
+                    .payLoad(savedDiary)
                     .isSuccessful(true)
                     .message("diary added successfully")
                     .statusCode(201)
