@@ -2,6 +2,7 @@ package com.example.diaryapp2.services;
 
 import com.example.diaryapp2.dtos.UserDto;
 import com.example.diaryapp2.exceptions.DiaryApplicationException;
+import com.example.diaryapp2.exceptions.UserNotFoundException;
 import com.example.diaryapp2.models.Diary;
 import com.example.diaryapp2.models.User;
 import org.springframework.validation.annotation.Validated;
@@ -15,4 +16,6 @@ public interface UserService {
     Diary addDiary(@NotNull Long id, @NotNull Diary diary) throws DiaryApplicationException;
     User findById( Long userId) throws DiaryApplicationException;
     boolean deleteUser(User user);
+
+    User findUserByEmail(String email) throws UserNotFoundException;
 }

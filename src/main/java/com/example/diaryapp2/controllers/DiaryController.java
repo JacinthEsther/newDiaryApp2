@@ -8,9 +8,14 @@ import com.example.diaryapp2.models.User;
 import com.example.diaryapp2.responses.ApiResponse;
 import com.example.diaryapp2.services.DiaryService;
 import com.example.diaryapp2.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("api/v3/diaryApp/diaries")
@@ -19,13 +24,15 @@ public class DiaryController {
 
     private UserService userService;
 
+    @Autowired
     public DiaryController(DiaryService diaryService, UserService userService) {
         this.diaryService = diaryService;
         this.userService = userService;
     }
 
     @PostMapping("/create/{userId}")// always reference the path variable before the request params
-    private ResponseEntity<?> createDiary(@PathVariable("userId") String userId, @RequestParam String title){
+    private ResponseEntity<?> createDiary(@Valid @NotNull @NotBlank @PathVariable("userId") String userId,
+                                          @NotNull @NotBlank @RequestParam String title){
         try {
             User user = userService.findById(Long.valueOf(userId));
             Diary diary = diaryService.createDiary(title,user);

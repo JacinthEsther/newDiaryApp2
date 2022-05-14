@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService, UserDetailsService{
       if(optionalUser.isEmpty()){
           User user = new User(email, password);
          User savedUser= userRepository.save(user);
-         //u can't save the user cs you need to map the user to keep the password secret
+         //u can't save the user cos you need to map the user to keep the password secret
           return mapper.map(savedUser, UserDto.class);
       }
       throw new DiaryApplicationException("email already exist");
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService, UserDetailsService{
 
     @Override
     public Diary addDiary(@NotNull Long id,@NotNull Diary diary) throws DiaryApplicationException {
-        User user = userRepository.findById(id).orElseThrow(()->new DiaryApplicationException("user does not exist"));
+        User user = userRepository.findById(id).orElseThrow(()-> new DiaryApplicationException("user does not exist"));
 //        user.addDiary(diary);
         user.addDiary(diary);
          userRepository.save(user);
@@ -66,6 +66,12 @@ public class UserServiceImpl implements UserService, UserDetailsService{
     public boolean deleteUser(User user) {
         userRepository.delete(user);
         return true;
+    }
+
+    @Override
+    public User findUserByEmail(String email) throws UserNotFoundException {
+       return userRepository.findUserByEmail(email).orElseThrow(()->
+                new UserNotFoundException("user name not found"));
     }
 
     @SneakyThrows

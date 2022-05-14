@@ -1,6 +1,7 @@
 package com.example.diaryapp2.security;
 
 import com.example.diaryapp2.exceptions.UnauthorizedEntryPoint;
+import com.example.diaryapp2.security.jwt.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.servlet.Filter;
 
 @Configuration  // this makes this class a bean
 @EnableWebSecurity
@@ -44,7 +48,8 @@ public class applicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
                 .authorizeHttpRequests(authorize->{
                     try {
-                        authorize.antMatchers("/**/users/create/**", "**/**/**/users/login/")
+                        authorize.antMatchers("/**/users/create/**",
+                                        "/**/**/**/auth/login")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()
@@ -54,6 +59,10 @@ public class applicationSecurityConfig extends WebSecurityConfigurerAdapter {
                                 )
                                 .and()
                                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+                        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+                        http.addFilterBefore(exceptionHandlerFilterBean(), JwtAuthenticationFilter.class);
+
                     }catch(Exception e){
                         throw new RuntimeException(e.getMessage());
                     }
@@ -63,6 +72,16 @@ public class applicationSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .permitAll()
 //                .anyRequest()
 //                .authenticated()
+    }
+
+    @Bean
+    public Filter exceptionHandlerFilterBean() {
+        return new ExceptionHandlerFilter();
+    }
+
+    @Bean
+    public Filter authenticationTokenFilterBean() {
+        return new JwtAuthenticationFilter();
     }
 
     @Bean

@@ -32,7 +32,6 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    @Size(min =6, max=10)
     private String password;
 
     @OneToMany(mappedBy="user",
