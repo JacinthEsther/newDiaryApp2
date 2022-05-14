@@ -1,22 +1,41 @@
 package com.example.diaryapp2.security;
 
+import com.example.diaryapp2.exceptions.ApiError;
+import io.jsonwebtoken.JwtException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.filter.OncePerRequestFilter;
+
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class ExceptionHandlerFilter implements Filter {
+public class ExceptionHandlerFilter extends OncePerRequestFilter {
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        Filter.super.init(filterConfig);
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws ServletException, IOException {
+        try {
+            chain.doFilter(request, response);
+        } catch (JwtException exception) {
+            exception.printStackTrace();
+            setErrorResponse(HttpStatus.BAD_REQUEST, response, exception);
+        } catch (RuntimeException exception) {
+            exception.printStackTrace();
+            setErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, response, exception);
+        }
+
     }
 
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-            throws IOException, ServletException {
-
-    }
-
-    @Override
-    public void destroy() {
-        Filter.super.destroy();
+    public void setErrorResponse(HttpStatus status, HttpServletResponse response, Throwable exception) {
+        response.setStatus(status.value());
+        response.setContentType("application/json");
+        ApiError apiError = new ApiError(status, exception);
+        try {
+            String JsonOutput = apiError.convertToJson();
+            response.getWriter().write(JsonOutput);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

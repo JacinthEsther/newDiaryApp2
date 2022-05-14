@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     @Autowired
-    UserService userService;
+   private UserService userService;
 
     @Autowired
-    AuthenticationManager authenticationManager;
+   private AuthenticationManager authenticationManager;
 
     @Autowired
     private TokenProvider tokenProvider;

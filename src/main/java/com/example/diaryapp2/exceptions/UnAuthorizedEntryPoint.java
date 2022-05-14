@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 @Slf4j
 @Component
-public class UnauthorizedEntryPoint implements AuthenticationEntryPoint, Serializable {
+public class UnAuthorizedEntryPoint implements AuthenticationEntryPoint, Serializable {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {

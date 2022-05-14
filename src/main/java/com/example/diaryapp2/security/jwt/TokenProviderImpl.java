@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -34,14 +35,14 @@ public class TokenProviderImpl implements TokenProvider{
 //    @Value("${jwt.authorities.key}")
 //    private String AUTHORITIES_KEY;
 
-    private static long TOKEN_VALIDITY_PERIOD = (long) (24 * 10 * 3600);
+    private final static long TOKEN_VALIDITY_PERIOD = (long) (24 * 10 * 3600);
 
 
 //    @Autowired
 //    private TokenRepository tokenRepository;
-
-    @Autowired
-    private UserService userService;
+//
+//    @Autowired
+//    private UserService userService;
 
     @Override
     public String getUsernameFromJWTToken(String token) {
@@ -77,7 +78,7 @@ public class TokenProviderImpl implements TokenProvider{
 
     @Override
     public Boolean isJWTTokenExpired(String token) {
-        final Date expiration = getExpirationDateFromJWTToken(token);
+         Date expiration = getExpirationDateFromJWTToken(token);
         return expiration.before(new Date());
     }
 
@@ -87,7 +88,7 @@ public class TokenProviderImpl implements TokenProvider{
                 .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
         return Jwts.builder()
                 .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, authorities)
+                .claim(AUTHORITIES_KEY, new ArrayList<>())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY_PERIOD ))
                 .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)

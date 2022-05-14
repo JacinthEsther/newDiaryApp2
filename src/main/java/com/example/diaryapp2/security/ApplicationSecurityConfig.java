@@ -1,6 +1,6 @@
 package com.example.diaryapp2.security;
 
-import com.example.diaryapp2.exceptions.UnauthorizedEntryPoint;
+import com.example.diaryapp2.exceptions.UnAuthorizedEntryPoint;
 import com.example.diaryapp2.security.jwt.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,73 +15,54 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import javax.servlet.Filter;
-
 @Configuration  // this makes this class a bean
 @EnableWebSecurity
-public class applicationSecurityConfig extends WebSecurityConfigurerAdapter {
+public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     UserDetailsService userDetailsService;
 
     @Autowired
-    UnauthorizedEntryPoint unauthorizedEntryPoint;
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).
-                passwordEncoder(bCryptPasswordEncoder());
-//        super.configure(auth);
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
+    UnAuthorizedEntryPoint unAuthorizedEntryPoint;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .cors()
-                .and()
-                .csrf()
-                .disable()
-                .authorizeHttpRequests(authorize->{
+        http.cors().and().csrf().disable()
+                .authorizeHttpRequests(authorize -> {
                     try {
-                        authorize.antMatchers("/**/users/create/**",
-                                        "/**/**/**/auth/login")
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated()
+                        authorize.antMatchers("**/**/**/users/create/**", "/**/auth/login").permitAll()
+                                .anyRequest().authenticated()
                                 .and()
-                                .exceptionHandling().authenticationEntryPoint(
-                                        unauthorizedEntryPoint
-                                )
+                                .exceptionHandling().authenticationEntryPoint(unAuthorizedEntryPoint)
                                 .and()
                                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
                         http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
                         http.addFilterBefore(exceptionHandlerFilterBean(), JwtAuthenticationFilter.class);
 
-                    }catch(Exception e){
+                    } catch (Exception e) {
                         throw new RuntimeException(e.getMessage());
                     }
                 });
-//                .authorizeRequests()
-//                .antMatchers("**/**/**/users/create","**/**/**/users/login")
-//                .permitAll()
-//                .anyRequest()
-//                .authenticated()
+    }
+    @Bean
+    public JwtAuthenticationFilter authenticationTokenFilterBean(){
+        return new JwtAuthenticationFilter();
     }
 
     @Bean
-    public Filter exceptionHandlerFilterBean() {
+    public ExceptionHandlerFilter exceptionHandlerFilterBean(){
         return new ExceptionHandlerFilter();
     }
 
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+    }
+
     @Bean
-    public Filter authenticationTokenFilterBean() {
-        return new JwtAuthenticationFilter();
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
     @Bean

@@ -15,8 +15,6 @@ public interface TokenProvider {
     String getUsernameFromJWTToken(String token);
 
 
-
-
     Date getExpirationDateFromJWTToken(String token);
 
 
