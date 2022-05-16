@@ -35,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 //        log.info("Authorized");
 
         if (header != null && header.startsWith("Bearer")) {
-            authToken = header.replace("Bearer", "");
+            authToken = header.replace("Bearer ", "");
             try {
                 username = tokenProvider.getUsernameFromJWTToken(authToken);
             } catch (IllegalArgumentException e) {
@@ -62,7 +62,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 logger.info("authenticated user " + username + " setting security context");
-
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }

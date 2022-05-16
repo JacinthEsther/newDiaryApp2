@@ -2,6 +2,7 @@ package com.example.diaryapp2.security.jwt;
 
 import com.example.diaryapp2.services.UserService;
 import io.jsonwebtoken.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,13 +12,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.example.diaryapp2.security.jwt.SecurityConstants.AUTHORITIES_KEY;
+import static com.example.diaryapp2.security.jwt.SecurityConstants.SIGNING_KEY;
+
+@Slf4j
 @Component
 public class TokenProviderImpl implements TokenProvider{
 
@@ -25,9 +27,7 @@ public class TokenProviderImpl implements TokenProvider{
 //    public long TOKEN_VALIDITY;
 
 
-    private String SIGNING_KEY = System.getenv("SIGNING_KEY");// signing key is the key stored in a string variable
-    private String AUTHORITIES_KEY = System.getenv("AUTHORITIES_KEY");
-    private final int ACCESS_TOKEN_VALIDITY = 9 * 3_600_000;//9hrs
+//    private final int ACCESS_TOKEN_VALIDITY = 9 * 3_600_000;//9hrs
 //
 //    @Value("${jwt.signing.key}")
 //    private String SIGNING_KEY;
@@ -35,7 +35,7 @@ public class TokenProviderImpl implements TokenProvider{
 //    @Value("${jwt.authorities.key}")
 //    private String AUTHORITIES_KEY;
 
-    private final static long TOKEN_VALIDITY_PERIOD = (long) (24 * 10 * 3600);
+    private final static Long TOKEN_VALIDITY_PERIOD = (long) (24 * 10 * 3600);
 
 
 //    @Autowired
@@ -84,15 +84,23 @@ public class TokenProviderImpl implements TokenProvider{
 
     @Override
     public String generateJWTToken(Authentication authentication) {
+        log.info("Signing key -> {}", SIGNING_KEY);
+        log.info("Authorities key -> {}", AUTHORITIES_KEY);
+        log.info("Authentication name --> {}",authentication.getName());
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
-        return Jwts.builder()
+
+       String jwt= Jwts.builder()
                 .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, new ArrayList<>())
+                .claim(AUTHORITIES_KEY, authorities)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY_PERIOD ))
                 .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)
                 .compact();
+        log.info("Authentication name --> {}",authentication.getName());
+        log.info("authorities-->{}", AUTHORITIES_KEY);
+        log.info("Jwt -->{}", jwt);
+        return jwt;
     }
 
     @Override
@@ -108,10 +116,10 @@ public class TokenProviderImpl implements TokenProvider{
         final Jws<Claims> claimsJws = jwtParser.parseClaimsJws(token);
         final Claims claims = claimsJws.getBody();
 
-        final Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+        final Collection<? extends GrantedAuthority> authorities = Collections.emptyList();
+//                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+//                        .map(SimpleGrantedAuthority::new)
+//                        .collect(Collectors.toList());
         return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
     }
 }

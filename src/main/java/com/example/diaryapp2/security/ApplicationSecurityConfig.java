@@ -27,15 +27,22 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable()
+        http
+                .cors()
+                .and()
+                .csrf()
+                .disable()
                 .authorizeHttpRequests(authorize -> {
                     try {
-                        authorize.antMatchers("**/**/**/users/create/**", "/**/auth/login").permitAll()
-                                .anyRequest().authenticated()
+                        authorize.antMatchers("/**/users/create/**", "/**/auth/login")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated()
                                 .and()
                                 .exceptionHandling().authenticationEntryPoint(unAuthorizedEntryPoint)
                                 .and()
-                                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                                .sessionManagement()
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
                         http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
                         http.addFilterBefore(exceptionHandlerFilterBean(), JwtAuthenticationFilter.class);

@@ -33,7 +33,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws UserNotFoundException {
 
-//        log.info("Responding1");
 
         Authentication authentication= authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),
@@ -41,7 +40,9 @@ public class AuthController {
 
         );
 
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
         final String token= tokenProvider.generateJWTToken(authentication);
         log.info("Responding2");
         User user= userService.findUserByEmail(loginRequest.getEmail());

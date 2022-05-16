@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v3/diaryApp")
+@RequestMapping("/api/v3/diaryApp")
 public class userController {
 
     private UserService userService;
@@ -38,7 +38,7 @@ public class userController {
 
     @PostMapping("/users/create")
     public ResponseEntity<?> createUser(@RequestParam @Valid @NotNull @NotBlank String email,
-                                        @RequestParam @Valid @NotNull @NotBlank String password) throws DiaryApplicationException {
+                                        @RequestParam @Valid @NotNull String password) throws DiaryApplicationException {
 
             log.info("Hello");
             password = bCryptPasswordEncoder.encode(password);
