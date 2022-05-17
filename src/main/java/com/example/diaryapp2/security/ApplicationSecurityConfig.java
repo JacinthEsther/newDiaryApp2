@@ -39,7 +39,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
                 .authorizeHttpRequests(authorize -> {
                     try {
-                        authorize.antMatchers("/**/users/create/**", "/**/auth/login")
+                        authorize.antMatchers("/**/**/**/users/create/**", "/**/auth/login")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()

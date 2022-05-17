@@ -76,6 +76,7 @@ public class User {
     }
 
     public void addRole(Role role){
+        if(this.roles==null) roles= new HashSet<>();
         roles.add(role);
     }
 
