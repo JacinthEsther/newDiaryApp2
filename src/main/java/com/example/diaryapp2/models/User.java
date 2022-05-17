@@ -1,8 +1,6 @@
 package com.example.diaryapp2.models;
 
 
-
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,6 +30,9 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @OneToMany(cascade=CascadeType.ALL,orphanRemoval = true,fetch=FetchType.EAGER)
+    private Set <Role> roles;
+
     private String password;
 
     @OneToMany(mappedBy="user",
@@ -40,10 +41,21 @@ public class User {
             orphanRemoval = true)
     private Set<Diary> diaries;
 
+
+
     public User(String email, String password) {
         this.email = email;
         this.password = password;
         this.diaries=new HashSet<>();
+    }
+
+    public User(String email, String password, RoleType roletype) {
+        this.email = email;
+        this.password = password;
+        if(roles==null){
+            roles= new HashSet<>();
+        }
+            roles.add(new Role(roletype));
     }
 
     @Override
@@ -61,6 +73,10 @@ public class User {
 
     public void deleteAllDiaries(List<Diary> diariesList){
         diariesList.forEach(diaries::remove);
+    }
+
+    public void addRole(Role role){
+        roles.add(role);
     }
 
 }

@@ -10,11 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -40,7 +44,6 @@ public class userController {
     public ResponseEntity<?> createUser(@RequestParam @Valid @NotNull @NotBlank String email,
                                         @RequestParam @Valid @NotNull String password) throws DiaryApplicationException {
 
-            log.info("Hello");
             password = bCryptPasswordEncoder.encode(password);
             UserDto userDto=userService.createAccount(email, password);
 
@@ -50,7 +53,20 @@ public class userController {
                     .statusCode(201)
                     .message("user created successfully")
                     .build();
-//            log.info("response",response.getMessage());
             return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException exception){
+        Map<String, String> errors = new HashMap();
+        exception.getBindingResult().getAllErrors().forEach(
+                (error ->{
+                    String fieldName= ((FieldError)error).getField();
+                    String errorMessage = error.getDefaultMessage();
+                    errors.put(fieldName, errorMessage);
+                })
+        );
+        return errors;
     }
 }
